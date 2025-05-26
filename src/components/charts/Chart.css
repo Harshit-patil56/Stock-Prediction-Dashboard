@@ -1,0 +1,35 @@
+.chart-wrapper {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+}
+
+.chart-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-loading p {
+  margin-top: 16px;
+  font-size: 0.875rem;
+}
+
+.light-theme .chart-loading p {
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .chart-loading p {
+  color: var(--text-secondary-dark);
+}

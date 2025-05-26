@@ -1,0 +1,258 @@
+.settings-page {
+  width: 100%;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .settings-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.setting-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid;
+  background-color: transparent;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.light-theme .setting-input {
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+.dark-theme .setting-input {
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+}
+
+.setting-description {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+}
+
+.light-theme .setting-description {
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .setting-description {
+  color: var(--text-secondary-dark);
+}
+
+.api-info {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-top: 16px;
+}
+
+.light-theme .api-info {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: var(--warning-color);
+}
+
+.dark-theme .api-info {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: var(--warning-color);
+}
+
+.warning-icon {
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.setting-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid;
+}
+
+.light-theme .setting-toggle {
+  border-color: var(--border-light);
+}
+
+.dark-theme .setting-toggle {
+  border-color: var(--border-dark);
+}
+
+.setting-toggle:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--primary-color);
+}
+
+input:focus + .toggle-slider {
+  box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.danger-zone {
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.light-theme .danger-zone {
+  background-color: rgba(244, 67, 54, 0.05);
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.dark-theme .danger-zone {
+  background-color: rgba(244, 67, 54, 0.05);
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.danger-zone h2 {
+  color: var(--danger-color);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.danger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.danger-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid;
+}
+
+.light-theme .danger-action {
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.dark-theme .danger-action {
+  border-color: rgba(244, 67, 54, 0.2);
+}
+
+.danger-action:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.danger-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.danger-info p {
+  font-size: 0.875rem;
+}
+
+.light-theme .danger-info p {
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .danger-info p {
+  color: var(--text-secondary-dark);
+}
+
+.btn.danger {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn.danger:hover {
+  background-color: rgba(244, 67, 54, 0.1);
+}
