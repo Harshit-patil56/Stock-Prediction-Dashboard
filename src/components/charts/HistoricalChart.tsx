@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
+import TechnicalIndicators from './TechnicalIndicators';
 import './Chart.css';
 
 interface HistoricalChartProps {
@@ -47,11 +48,12 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
           const close = price * (1 + (Math.random() * 0.02 - 0.01));
           
           data.push({
-            time: currentDate.toISOString().split('T')[0],
-            open: open,
-            high: high,
-            low: low,
-            close: close
+            Date: currentDate.toISOString().split('T')[0],
+            Open: open,
+            High: high,
+            Low: low,
+            Close: close,
+            Volume: Math.floor(Math.random() * 1000000) + 100000
           });
           
           price = close;
@@ -94,7 +96,16 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
       wickDownColor: '#F44336',
     });
 
-    candleSeries.setData(chartData);
+    // Convert data format for the candlestick chart
+    const candleData = chartData.map(d => ({
+      time: d.Date,
+      open: d.Open,
+      high: d.High,
+      low: d.Low,
+      close: d.Close
+    }));
+
+    candleSeries.setData(candleData);
 
     chart.timeScale().fitContent();
 
@@ -114,7 +125,10 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
           <p>Loading chart data...</p>
         </div>
       ) : (
-        <div className="chart-container" ref={chartContainerRef}></div>
+        <>
+          <div className="chart-container" ref={chartContainerRef}></div>
+          <TechnicalIndicators symbol={symbol} data={chartData} />
+        </>
       )}
     </div>
   );

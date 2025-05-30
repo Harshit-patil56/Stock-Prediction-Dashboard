@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { Download, Filter, RefreshCw } from 'lucide-react';
+import { Download, Filter, RefreshCw, Star } from 'lucide-react';
 import HistoricalChart from '../components/charts/HistoricalChart';
 import HistoricalTable from '../components/tables/HistoricalTable';
 import { useParams } from 'react-router-dom';
@@ -13,6 +13,8 @@ const HistoricalData: React.FC = () => {
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
   const [selectedStock, setSelectedStock] = useState(initialStock);
   const [dateRange, setDateRange] = useState('1y');
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const [watchlistError, setWatchlistError] = useState<string | null>(null);
 
   const dateRanges = [
     { value: '1m', label: '1 Month' },
@@ -33,6 +35,42 @@ const HistoricalData: React.FC = () => {
     { value: 'AMZN', label: 'Amazon' },
     { value: 'META', label: 'Meta Platforms' },
   ];
+
+  const handleAddToWatchlist = async () => {
+    const stock = stockOptions.find(s => s.value === selectedStock);
+    if (!stock) return;
+
+    setIsAddingToWatchlist(true);
+    setWatchlistError(null);
+
+    try {
+      const response = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbol: stock.value,
+          name: stock.label,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setWatchlistError('Successfully added to watchlist');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        setWatchlistError(data.error || 'Failed to add to watchlist');
+      }
+    } catch (error) {
+      setWatchlistError('Failed to add to watchlist');
+      console.error('Error adding to watchlist:', error);
+    } finally {
+      setIsAddingToWatchlist(false);
+    }
+  };
 
   return (
     <div className="historical-data-page">
@@ -58,11 +96,11 @@ const HistoricalData: React.FC = () => {
         <div className="filter-group">
           <label>Stock</label>
           <select 
+            className="filter-select"
             value={selectedStock}
             onChange={(e) => setSelectedStock(e.target.value)}
-            className="filter-select"
           >
-            {stockOptions.map((option) => (
+            {stockOptions.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -73,33 +111,44 @@ const HistoricalData: React.FC = () => {
         <div className="filter-group">
           <label>Time Period</label>
           <select 
+            className="filter-select"
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="filter-select"
           >
-            {dateRanges.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {dateRanges.map(range => (
+              <option key={range.value} value={range.value}>
+                {range.label}
               </option>
             ))}
           </select>
         </div>
 
         <div className="filter-actions">
-          <button className="btn btn-outline">
-            <Filter size={16} />
-            More Filters
-          </button>
-          <button className="btn btn-outline">
-            <RefreshCw size={16} />
-            Refresh
-          </button>
-          <button className="btn btn-primary">
-            <Download size={16} />
-            Export
+          <button 
+            className="btn btn-primary"
+            onClick={handleAddToWatchlist}
+            disabled={isAddingToWatchlist}
+          >
+            {isAddingToWatchlist ? (
+              <>
+                <div className="loading-spinner-small"></div>
+                Adding...
+              </>
+            ) : (
+              <>
+                <Star size={16} />
+                Add to Watchlist
+              </>
+            )}
           </button>
         </div>
       </div>
+
+      {watchlistError && (
+        <div className={`alert ${watchlistError.includes('Successfully') ? 'alert-success' : 'alert-error'}`}>
+          {watchlistError}
+        </div>
+      )}
 
       <div className="card">
         <div className="card-header">

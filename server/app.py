@@ -9,8 +9,21 @@ import json
 import os
 from datetime import datetime, timedelta
 import io
+from sentiment_analyzer import SentimentAnalyzer
+import nltk
+
+# Try to download required NLTK data if not present
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+try:
+    nltk.data.find('averaged_perceptron_tagger')
+except LookupError:
+    nltk.download('averaged_perceptron_tagger')
 
 app = Flask(__name__)
+sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):
     data = data.copy()
@@ -130,25 +143,239 @@ def get_historical_data():
 @app.route('/api/symbols', methods=['GET'])
 def search_symbols():
     try:
-        query = request.args.get('query', '')
+        query = request.args.get('query', '').strip().lower()
         
-        # This would typically use a more comprehensive API
-        # For now, return some common stocks
-        symbols = [
-            {'symbol': '^GSPC', 'name': 'S&P 500'},
-            {'symbol': 'AAPL', 'name': 'Apple Inc.'},
-            {'symbol': 'MSFT', 'name': 'Microsoft'},
-            {'symbol': 'GOOGL', 'name': 'Alphabet Inc.'},
-            {'symbol': 'AMZN', 'name': 'Amazon'},
-            {'symbol': 'META', 'name': 'Meta Platforms'},
-            {'symbol': 'TSLA', 'name': 'Tesla'},
-            {'symbol': 'NVDA', 'name': 'NVIDIA'},
+        if not query:
+            return jsonify({
+                'success': True,
+                'data': []
+            })
+
+        # Common stock indices
+        indices = [
+            {'symbol': '^GSPC', 'name': 'S&P 500', 'type': 'Index'},
+            {'symbol': '^DJI', 'name': 'Dow Jones Industrial Average', 'type': 'Index'},
+            {'symbol': '^IXIC', 'name': 'NASDAQ Composite', 'type': 'Index'},
+            {'symbol': '^RUT', 'name': 'Russell 2000', 'type': 'Index'},
+            {'symbol': '^VIX', 'name': 'CBOE Volatility Index', 'type': 'Index'},
         ]
-        
-        filtered = [s for s in symbols if query.lower() in s['symbol'].lower() or query.lower() in s['name'].lower()]
-        return jsonify({'success': True, 'data': filtered})
+
+        # Popular stocks
+        stocks = [
+            {'symbol': 'AAPL', 'name': 'Apple Inc.', 'type': 'Technology'},
+            {'symbol': 'MSFT', 'name': 'Microsoft Corporation', 'type': 'Technology'},
+            {'symbol': 'GOOGL', 'name': 'Alphabet Inc.', 'type': 'Technology'},
+            {'symbol': 'AMZN', 'name': 'Amazon.com Inc.', 'type': 'Consumer Cyclical'},
+            {'symbol': 'META', 'name': 'Meta Platforms Inc.', 'type': 'Technology'},
+            {'symbol': 'TSLA', 'name': 'Tesla Inc.', 'type': 'Automotive'},
+            {'symbol': 'NVDA', 'name': 'NVIDIA Corporation', 'type': 'Technology'},
+            {'symbol': 'JPM', 'name': 'JPMorgan Chase & Co.', 'type': 'Financial Services'},
+            {'symbol': 'V', 'name': 'Visa Inc.', 'type': 'Financial Services'},
+            {'symbol': 'WMT', 'name': 'Walmart Inc.', 'type': 'Consumer Defensive'},
+            {'symbol': 'JNJ', 'name': 'Johnson & Johnson', 'type': 'Healthcare'},
+            {'symbol': 'PG', 'name': 'Procter & Gamble Co.', 'type': 'Consumer Defensive'},
+            {'symbol': 'MA', 'name': 'Mastercard Inc.', 'type': 'Financial Services'},
+            {'symbol': 'HD', 'name': 'Home Depot Inc.', 'type': 'Consumer Cyclical'},
+            {'symbol': 'BAC', 'name': 'Bank of America Corp.', 'type': 'Financial Services'},
+        ]
+
+        # Combine all symbols
+        all_symbols = indices + stocks
+
+        # Search in both symbol and name
+        results = []
+        for item in all_symbols:
+            if (query in item['symbol'].lower() or 
+                query in item['name'].lower() or
+                any(word in item['name'].lower() for word in query.split())):
+                results.append(item)
+
+        # Sort results: exact matches first, then partial matches
+        def sort_key(item):
+            symbol_match = item['symbol'].lower() == query
+            name_match = item['name'].lower() == query
+            symbol_starts = item['symbol'].lower().startswith(query)
+            name_starts = item['name'].lower().startswith(query)
+            
+            if symbol_match or name_match:
+                return 0
+            elif symbol_starts or name_starts:
+                return 1
+            else:
+                return 2
+
+        results.sort(key=sort_key)
+
+        # Limit results to prevent overwhelming the UI
+        results = results[:10]
+
+        return jsonify({
+            'success': True,
+            'data': results
+        })
+
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/sentiment', methods=['GET'])
+def sentiment():
+    symbol = request.args.get('symbol', 'AAPL')
+    days = int(request.args.get('days', 7))
+    try:
+        result = sentiment_analyzer.get_news_sentiment(symbol, days)
+        return jsonify({"success": True, "data": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+# Watchlist management
+@app.route('/api/watchlist', methods=['GET'])
+def get_watchlist():
+    try:
+        # Use absolute path for watchlist file
+        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
+        print(f"Watchlist file path: {watchlist_file}")  # Debug log
+        
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
+        
+        if os.path.exists(watchlist_file):
+            try:
+                with open(watchlist_file, 'r') as f:
+                    watchlist = json.load(f)
+                print(f"Loaded watchlist: {watchlist}")  # Debug log
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")  # Debug log
+                watchlist = []
+                with open(watchlist_file, 'w') as f:
+                    json.dump(watchlist, f)
+        else:
+            print("Watchlist file does not exist, creating new file")  # Debug log
+            watchlist = []
+            with open(watchlist_file, 'w') as f:
+                json.dump(watchlist, f)
+        
+        return jsonify({
+            'success': True,
+            'data': watchlist
+        })
+    except Exception as e:
+        print(f"Error in get_watchlist: {str(e)}")  # Debug log
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/watchlist', methods=['POST'])
+def add_to_watchlist():
+    try:
+        data = request.get_json()
+        print(f"Received data: {data}")  # Debug log
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+            
+        symbol = data.get('symbol')
+        name = data.get('name')
+        
+        if not symbol or not name:
+            return jsonify({
+                'success': False,
+                'error': 'Symbol and name are required'
+            }), 400
+        
+        # Use absolute path for watchlist file
+        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
+        print(f"Watchlist file path: {watchlist_file}")  # Debug log
+        
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
+        
+        if os.path.exists(watchlist_file):
+            try:
+                with open(watchlist_file, 'r') as f:
+                    watchlist = json.load(f)
+                print(f"Loaded watchlist: {watchlist}")  # Debug log
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")  # Debug log
+                watchlist = []
+        else:
+            print("Watchlist file does not exist, creating new file")  # Debug log
+            watchlist = []
+        
+        # Check if symbol already exists
+        if any(item['symbol'] == symbol for item in watchlist):
+            existing_item = next(item for item in watchlist if item['symbol'] == symbol)
+            return jsonify({
+                'success': False,
+                'error': f"{existing_item['name']} is already in your watchlist"
+            }), 400
+        
+        # Add new item
+        new_item = {
+            'symbol': symbol,
+            'name': name,
+            'added_at': datetime.now().isoformat()
+        }
+        watchlist.append(new_item)
+        print(f"Adding new item: {new_item}")  # Debug log
+        
+        # Save updated watchlist
+        with open(watchlist_file, 'w') as f:
+            json.dump(watchlist, f)
+        print("Watchlist saved successfully")  # Debug log
+        
+        return jsonify({
+            'success': True,
+            'data': watchlist
+        })
+    except Exception as e:
+        print(f"Error in add_to_watchlist: {str(e)}")  # Debug log
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/watchlist/<symbol>', methods=['DELETE'])
+def remove_from_watchlist(symbol):
+    try:
+        # Use absolute path for watchlist file
+        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
+        
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
+        
+        if os.path.exists(watchlist_file):
+            try:
+                with open(watchlist_file, 'r') as f:
+                    watchlist = json.load(f)
+            except json.JSONDecodeError:
+                watchlist = []
+        else:
+            watchlist = []
+            
+        # Remove item
+        watchlist = [item for item in watchlist if item['symbol'] != symbol]
+        
+        # Save updated watchlist
+        with open(watchlist_file, 'w') as f:
+            json.dump(watchlist, f)
+        
+        return jsonify({
+            'success': True,
+            'data': watchlist
+        })
+    except Exception as e:
+        print(f"Error in remove_from_watchlist: {str(e)}")  # Add logging
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

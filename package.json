@@ -11,11 +11,18 @@
     "server": "cd server && python app.py"
   },
   "dependencies": {
+    "@radix-ui/react-progress": "^1.1.7",
+    "@radix-ui/react-scroll-area": "^1.2.9",
+    "@types/recharts": "^1.8.29",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lightweight-charts": "^4.1.1",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.21.3",
-    "lightweight-charts": "^4.1.1"
+    "recharts": "^2.15.3",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

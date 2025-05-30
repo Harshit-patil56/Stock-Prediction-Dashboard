@@ -7,10 +7,9 @@ import {
   BarChart2, 
   Settings, 
   X,
-  Briefcase,
-  Clock,
   Users
 } from 'lucide-react';
+import Watchlist from '../watchlist/Watchlist';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -25,29 +24,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        if (isOpen) {
-          toggleSidebar();
-        }
+        toggleSidebar();
       }
     };
 
-    // Add event listener when sidebar is open
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      // Clean up event listener when sidebar is closed
-      document.removeEventListener('mousedown', handleClickOutside);
     }
 
-    // Clean up event listener on component unmount
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, toggleSidebar]); // Re-run effect if isOpen or toggleSidebar changes
+  }, [isOpen, toggleSidebar]);
 
   return (
-    <div ref={sidebarRef} className={`sidebar ${isOpen ? 'open' : ''} ${theme}-theme`}>
+    <div className={`sidebar ${isOpen ? 'open' : ''} ${theme}`} ref={sidebarRef}>
       <div className="sidebar-header">
+        <h2>Stock Predictor</h2>
         <button className="close-sidebar" onClick={toggleSidebar}>
           <X size={24} />
         </button>
@@ -77,59 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         </nav>
         
         <div className="sidebar-section">
-          <h3 className="sidebar-heading">Watchlist</h3>
-          <ul className="sidebar-list">
-            <li className="sidebar-item">
-              <Briefcase size={16} />
-              <span>S&P 500</span>
-              <span className="item-value up">+1.2%</span>
-            </li>
-            <li className="sidebar-item">
-              <Briefcase size={16} />
-              <span>AAPL</span>
-              <span className="item-value up">+0.8%</span>
-            </li>
-            <li className="sidebar-item">
-              <Briefcase size={16} />
-              <span>MSFT</span>
-              <span className="item-value down">-0.3%</span>
-            </li>
-            <li className="sidebar-item">
-              <Briefcase size={16} />
-              <span>GOOGL</span>
-              <span className="item-value up">+1.5%</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div className="sidebar-section">
-          <h3 className="sidebar-heading">Recent Activity</h3>
-          <ul className="sidebar-list">
-            <li className="sidebar-item">
-              <Clock size={16} />
-              <span>S&P 500 Prediction</span>
-            </li>
-            <li className="sidebar-item">
-              <Clock size={16} />
-              <span>AAPL Analysis</span>
-            </li>
-            <li className="sidebar-item">
-              <Clock size={16} />
-              <span>TSLA Forecast</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-      
-      <div className="sidebar-footer">
-        <div className="user-info">
-          <div className="user-avatar">
-            <Users size={20} />
-          </div>
-          <div className="user-details">
-            <div className="user-name">User Account</div>
-            <div className="user-plan">Pro Plan</div>
-          </div>
+          <Watchlist />
         </div>
       </div>
     </div>

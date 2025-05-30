@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Info, ArrowRight, BarChart } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info, ArrowRight, BarChart, AlertTriangle, Clock, Shield } from 'lucide-react';
 import './Prediction.css';
 
 interface FeatureImportance {
@@ -14,6 +14,18 @@ interface PredictionData {
   symbol: string;
   date: string;
   features: FeatureImportance[];
+  confidenceInterval: {
+    lower: number;
+    upper: number;
+  };
+  modelMetrics: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+  };
+  reliabilityScore: number;
+  lastUpdated: string;
 }
 
 interface PredictionResultsProps {
@@ -21,6 +33,12 @@ interface PredictionResultsProps {
 }
 
 const PredictionResults: React.FC<PredictionResultsProps> = ({ predictionData }) => {
+  const getReliabilityColor = (score: number) => {
+    if (score >= 80) return 'high';
+    if (score >= 60) return 'medium';
+    return 'low';
+  };
+
   return (
     <div className="prediction-results">
       <div className="prediction-header">
@@ -41,6 +59,9 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({ predictionData })
               <span className={`stat-value ${predictionData.direction}`}>
                 {predictionData.direction === 'up' ? '+' : '-'}{Math.abs(predictionData.nextDayChange)}%
               </span>
+              <span className="confidence-interval">
+                ({predictionData.confidenceInterval.lower}% to {predictionData.confidenceInterval.upper}%)
+              </span>
             </div>
             <div className="prediction-stat">
               <span className="stat-label">Confidence</span>
@@ -50,6 +71,34 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({ predictionData })
               <span className="stat-label">Prediction Date</span>
               <span className="stat-value">{predictionData.date}</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="reliability-indicator">
+        <div className="reliability-header">
+          <Shield size={16} />
+          <span>Prediction Reliability</span>
+        </div>
+        <div className={`reliability-score ${getReliabilityColor(predictionData.reliabilityScore)}`}>
+          {predictionData.reliabilityScore}%
+        </div>
+        <div className="reliability-metrics">
+          <div className="metric">
+            <span className="metric-label">Accuracy</span>
+            <span className="metric-value">{predictionData.modelMetrics.accuracy}%</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Precision</span>
+            <span className="metric-value">{predictionData.modelMetrics.precision}%</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">Recall</span>
+            <span className="metric-value">{predictionData.modelMetrics.recall}%</span>
+          </div>
+          <div className="metric">
+            <span className="metric-label">F1 Score</span>
+            <span className="metric-value">{predictionData.modelMetrics.f1Score}%</span>
           </div>
         </div>
       </div>
@@ -66,6 +115,7 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({ predictionData })
             by approximately {Math.abs(predictionData.nextDayChange)}%
           </span> 
           in the next trading day. The model has a confidence level of {predictionData.confidence}% in this prediction.
+          The expected range of movement is between {predictionData.confidenceInterval.lower}% and {predictionData.confidenceInterval.upper}%.
         </p>
       </div>
 
@@ -88,6 +138,14 @@ const PredictionResults: React.FC<PredictionResultsProps> = ({ predictionData })
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="prediction-disclaimer">
+        <AlertTriangle size={16} />
+        <p>
+          This prediction was generated on {predictionData.lastUpdated}. Past performance is not indicative of future results.
+          Always conduct your own research and consider multiple factors before making investment decisions.
+        </p>
       </div>
 
       <div className="next-steps">

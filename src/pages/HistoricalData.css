@@ -69,21 +69,46 @@
   min-width: 180px;
   background-color: transparent;
   transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 32px;
 }
 
 .light-theme .filter-select {
   border-color: var(--border-light);
   color: var(--text-light);
+  background-color: white;
 }
 
 .dark-theme .filter-select {
   border-color: var(--border-dark);
   color: var(--text-dark);
+  background-color: var(--card-dark);
 }
 
 .filter-select:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+.filter-select option {
+  background-color: var(--card-dark);
+  color: var(--text-dark);
+}
+
+.light-theme .filter-select option {
+  background-color: white;
+  color: var(--text-light);
+}
+
+.dark-theme .filter-select option {
+  background-color: var(--card-dark);
+  color: var(--text-dark);
 }
 
 .filter-actions {
@@ -187,4 +212,23 @@
 
 .dark-theme .item-value {
   color: var(--text-dark);
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9375rem;
+}
+
+.alert-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  border: 1px solid var(--danger-color);
+  color: var(--danger-color);
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid var(--success-color);
+  color: var(--success-color);
 }

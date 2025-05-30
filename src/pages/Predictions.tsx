@@ -34,7 +34,19 @@ const Predictions: React.FC = () => {
           { name: 'Volatility', importance: parseFloat((Math.random() * 0.15 + 0.05).toFixed(2)) },
           { name: 'RSI', importance: parseFloat((Math.random() * 0.1 + 0.05).toFixed(2)) },
           { name: 'Other factors', importance: parseFloat((Math.random() * 0.1).toFixed(2)) }
-        ]
+        ],
+        confidenceInterval: {
+          lower: parseFloat((Math.random() * 0.5).toFixed(1)),
+          upper: parseFloat((Math.random() * 1.5 + 1).toFixed(1))
+        },
+        modelMetrics: {
+          accuracy: parseFloat((Math.random() * 20 + 60).toFixed(1)), // Between 60% and 80%
+          precision: parseFloat((Math.random() * 15 + 65).toFixed(1)), // Between 65% and 80%
+          recall: parseFloat((Math.random() * 15 + 65).toFixed(1)), // Between 65% and 80%
+          f1Score: parseFloat((Math.random() * 15 + 65).toFixed(1)) // Between 65% and 80%
+        },
+        reliabilityScore: parseFloat((Math.random() * 20 + 60).toFixed(1)), // Between 60% and 80%
+        lastUpdated: new Date().toLocaleString()
       };
       
       // Normalize feature importance to sum to 1

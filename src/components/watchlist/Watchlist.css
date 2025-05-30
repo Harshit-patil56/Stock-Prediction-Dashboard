@@ -1,0 +1,260 @@
+.watchlist-container {
+  width: 100%;
+  padding: 16px;
+}
+
+.watchlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.watchlist-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.add-to-watchlist {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.light-theme .add-to-watchlist {
+  border-color: var(--border-light);
+  color: var(--text-light);
+}
+
+.dark-theme .add-to-watchlist {
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.add-to-watchlist:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.watchlist-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px dashed;
+}
+
+.light-theme .watchlist-empty {
+  border-color: var(--border-light);
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .watchlist-empty {
+  border-color: var(--border-dark);
+  color: var(--text-secondary-dark);
+}
+
+.watchlist-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.watchlist-empty p {
+  margin-bottom: 16px;
+  font-size: 0.9375rem;
+}
+
+.watchlist-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.light-theme .watchlist-item {
+  background-color: white;
+  border: 1px solid var(--border-light);
+}
+
+.dark-theme .watchlist-item {
+  background-color: var(--card-dark);
+  border: 1px solid var(--border-dark);
+}
+
+.watchlist-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-light);
+}
+
+.dark-theme .watchlist-item:hover {
+  box-shadow: var(--shadow-dark);
+}
+
+.item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-symbol {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.item-name {
+  font-size: 0.8125rem;
+}
+
+.light-theme .item-name {
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .item-name {
+  color: var(--text-secondary-dark);
+}
+
+.item-change-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.trend-icon {
+  margin-right: 2px;
+}
+
+.trend-icon.up {
+  color: var(--success-color);
+}
+
+.trend-icon.down {
+  color: var(--danger-color);
+}
+
+.item-change {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.item-change.up {
+  color: var(--success-color);
+}
+
+.item-change.down {
+  color: var(--danger-color);
+}
+
+.remove-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.remove-item:hover {
+  opacity: 1;
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--danger-color);
+}
+
+.watchlist-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.watchlist-loading p {
+  margin-top: 12px;
+  font-size: 0.9375rem;
+}
+
+.light-theme .watchlist-loading p {
+  color: var(--text-secondary-light);
+}
+
+.dark-theme .watchlist-loading p {
+  color: var(--text-secondary-dark);
+}
+
+.watchlist-error {
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--danger-color);
+  font-size: 0.9375rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.watchlist-error p {
+  margin: 0;
+}
+
+.retry-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.retry-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.retry-button svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 

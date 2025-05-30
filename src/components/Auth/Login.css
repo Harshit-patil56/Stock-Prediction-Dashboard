@@ -1,0 +1,154 @@
+/* src/components/Auth/Login.css */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  /* Background color will be handled by global theme classes like .light-theme or .dark-theme */
+}
+
+.login-card {
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.light-theme .login-card {
+  background-color: white;
+}
+
+.dark-theme .login-card {
+  background-color: var(--card-background-dark); /* Assuming a dark theme variable exists or can be added */
+  color: var(--text-primary-dark);
+}
+
+.login-card h2 {
+  margin-bottom: 10px;
+  color: var(--text-primary-light); /* Default color for light theme */
+}
+
+.dark-theme .login-card h2 {
+  color: var(--text-primary-dark);
+}
+
+.login-card p {
+  margin-bottom: 20px;
+  color: #555; /* Default color */
+}
+
+.dark-theme .login-card p {
+  color: var(--text-secondary-dark); /* Assuming a dark theme variable exists or can be added */
+}
+
+.login-form {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.dark-theme .form-group input {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #fff;
+}
+
+.dark-theme .form-group input:focus {
+  border-color: var(--primary-color);
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.login-divider span {
+  padding: 0 10px;
+  color: #666;
+  font-size: 14px;
+}
+
+.dark-theme .login-divider::before,
+.dark-theme .login-divider::after {
+  border-bottom-color: #444;
+}
+
+.dark-theme .login-divider span {
+  color: #999;
+}
+
+.continue-without-login {
+  width: 100%;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #333;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.continue-without-login:hover {
+  background-color: #e5e5e5;
+}
+
+.dark-theme .continue-without-login {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #fff;
+}
+
+.dark-theme .continue-without-login:hover {
+  background-color: #333;
+} 

@@ -1,10 +1,12 @@
 import React, { useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { Save, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../App';
+import { Save, RefreshCw, LogOut, LogIn, Settings as SettingsIcon, User, Bell, Key, Sliders, Moon, Sun, AlertCircle } from 'lucide-react';
 import './Settings.css';
 
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { isAuthenticated, logout } = useAuth();
   const [modelParams, setModelParams] = useState({
     estimators: 200,
     minSamplesSplit: 50,
@@ -34,229 +36,275 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="settings-page">
-      <div className="page-header">
-        <h1>Settings</h1>
+    <div className="settings-container">
+      <div className="settings-header">
+        <h1><SettingsIcon size={24} /> Settings</h1>
       </div>
 
-      <div className="settings-grid">
-        <div className="card">
-          <div className="card-header">
-            <h2>Model Parameters</h2>
-            <div className="header-actions">
-              <button className="btn btn-outline" onClick={resetModel}>
-                <RefreshCw size={16} />
-                Reset
-              </button>
-              <button className="btn btn-primary" onClick={saveSettings}>
-                <Save size={16} />
-                Save
-              </button>
-            </div>
+      <div className="settings-content">
+        <section className="settings-section">
+          <div className="section-header">
+            <h2>Account Settings</h2>
+            <p>Manage your account preferences and settings</p>
           </div>
-          <div className="card-body">
-            <div className="setting-group">
-              <label htmlFor="estimators">Number of Estimators</label>
-              <input
-                id="estimators"
-                type="number"
-                value={modelParams.estimators}
-                onChange={(e) => setModelParams({...modelParams, estimators: parseInt(e.target.value)})}
-                className="setting-input"
-                min="10"
-                max="1000"
-              />
-              <div className="setting-description">
-                The number of trees in the random forest. Increasing this value generally improves model accuracy but increases computation time.
-              </div>
-            </div>
 
-            <div className="setting-group">
-              <label htmlFor="minSamplesSplit">Minimum Samples Split</label>
-              <input
-                id="minSamplesSplit"
-                type="number"
-                value={modelParams.minSamplesSplit}
-                onChange={(e) => setModelParams({...modelParams, minSamplesSplit: parseInt(e.target.value)})}
-                className="setting-input"
-                min="2"
-                max="100"
-              />
-              <div className="setting-description">
-                The minimum number of samples required to split an internal node. Higher values prevent overfitting.
-              </div>
-            </div>
-
-            <div className="setting-group">
-              <label htmlFor="maxFeatures">Max Features</label>
-              <select
-                id="maxFeatures"
-                value={modelParams.maxFeatures}
-                onChange={(e) => setModelParams({...modelParams, maxFeatures: e.target.value})}
-                className="setting-input"
-              >
-                <option value="auto">Auto</option>
-                <option value="sqrt">Sqrt</option>
-                <option value="log2">Log2</option>
-                <option value="none">None</option>
-              </select>
-              <div className="setting-description">
-                The number of features to consider when looking for the best split.
-              </div>
-            </div>
-
-            <div className="setting-group">
-              <label htmlFor="criterion">Split Criterion</label>
-              <select
-                id="criterion"
-                value={modelParams.criterion}
-                onChange={(e) => setModelParams({...modelParams, criterion: e.target.value})}
-                className="setting-input"
-              >
-                <option value="gini">Gini</option>
-                <option value="entropy">Entropy</option>
-              </select>
-              <div className="setting-description">
-                The function to measure the quality of a split.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="settings-column">
-          <div className="card">
+          <div className="settings-card">
             <div className="card-header">
-              <h2>API Settings</h2>
+              <User size={20} />
+              <h3>Profile</h3>
             </div>
-            <div className="card-body">
+            <div className="card-content">
               <div className="setting-group">
-                <label htmlFor="apiKey">Yahoo Finance API Key (Optional)</label>
+                <div className="setting-label">
+                  <span>Authentication Status</span>
+                  <span className={`status-badge ${isAuthenticated ? 'authenticated' : 'not-authenticated'}`}>
+                    {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+                  </span>
+                </div>
+                {isAuthenticated ? (
+                  <button className="btn btn-danger" onClick={logout}>
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                ) : (
+                  <button className="btn btn-primary" onClick={() => window.location.href = '/login'}>
+                    <LogIn size={16} />
+                    Sign in with Google
+                  </button>
+                )}
+              </div>
+
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Theme</span>
+                  <span className="setting-description">Choose your preferred theme</span>
+                </div>
+                <button 
+                  className={`theme-toggle ${theme === 'dark' ? 'dark' : 'light'}`}
+                  onClick={toggleTheme}
+                >
+                  {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+                  <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="section-header">
+            <h2>Model Parameters</h2>
+            <p>Configure your prediction model settings</p>
+          </div>
+
+          <div className="settings-card">
+            <div className="card-header">
+              <Sliders size={20} />
+              <h3>Model Configuration</h3>
+            </div>
+            <div className="card-content">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Number of Estimators</span>
+                  <span className="setting-description">The number of trees in the random forest</span>
+                </div>
                 <input
-                  id="apiKey"
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
+                  type="number"
+                  value={modelParams.estimators}
+                  onChange={(e) => setModelParams({ ...modelParams, estimators: parseInt(e.target.value) })}
+                  min="1"
+                  max="1000"
                   className="setting-input"
-                  placeholder="Enter your API key"
                 />
-                <div className="setting-description">
-                  Using your own API key can increase request limits.
+              </div>
+
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Min Samples Split</span>
+                  <span className="setting-description">Minimum samples required to split a node</span>
+                </div>
+                <input
+                  type="number"
+                  value={modelParams.minSamplesSplit}
+                  onChange={(e) => setModelParams({ ...modelParams, minSamplesSplit: parseInt(e.target.value) })}
+                  min="2"
+                  max="100"
+                  className="setting-input"
+                />
+              </div>
+
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Max Features</span>
+                  <span className="setting-description">Number of features to consider for best split</span>
+                </div>
+                <select
+                  value={modelParams.maxFeatures}
+                  onChange={(e) => setModelParams({ ...modelParams, maxFeatures: e.target.value })}
+                  className="setting-input"
+                >
+                  <option value="auto">Auto</option>
+                  <option value="sqrt">Square Root</option>
+                  <option value="log2">Log2</option>
+                </select>
+              </div>
+
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Criterion</span>
+                  <span className="setting-description">Function to measure split quality</span>
+                </div>
+                <select
+                  value={modelParams.criterion}
+                  onChange={(e) => setModelParams({ ...modelParams, criterion: e.target.value })}
+                  className="setting-input"
+                >
+                  <option value="gini">Gini</option>
+                  <option value="entropy">Entropy</option>
+                </select>
+              </div>
+
+              <div className="card-actions">
+                <button className="btn btn-primary" onClick={saveSettings}>
+                  <Save size={16} />
+                  Save Changes
+                </button>
+                <button className="btn btn-secondary" onClick={resetModel}>
+                  <RefreshCw size={16} />
+                  Reset to Default
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div className="section-header">
+            <h2>API Configuration</h2>
+            <p>Manage your API keys and integration settings</p>
+          </div>
+
+          <div className="settings-card">
+            <div className="card-header">
+              <Key size={20} />
+              <h3>API Keys</h3>
+            </div>
+            <div className="card-content">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Yahoo Finance API Key</span>
+                  <span className="setting-description">Your API key for Yahoo Finance data</span>
+                </div>
+                <div className="api-key-group">
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                    className="setting-input"
+                  />
+                  <button className="btn btn-secondary" onClick={() => setApiKey('')}>
+                    Clear
+                  </button>
                 </div>
               </div>
 
               <div className="api-info">
-                <AlertTriangle size={16} className="warning-icon" />
+                <AlertCircle size={16} />
                 <p>The app can function without an API key, but request limits may apply.</p>
               </div>
+
+              <div className="card-actions">
+                <button className="btn btn-primary" onClick={saveSettings}>
+                  <Save size={16} />
+                  Save API Key
+                </button>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="card">
+        <section className="settings-section">
+          <div className="section-header">
+            <h2>Notification Settings</h2>
+            <p>Configure how you want to receive updates</p>
+          </div>
+
+          <div className="settings-card">
             <div className="card-header">
-              <h2>Notifications</h2>
+              <Bell size={20} />
+              <h3>Notifications</h3>
             </div>
-            <div className="card-body">
-              <div className="setting-toggle">
-                <label htmlFor="emailAlerts">Email Alerts</label>
-                <label className="toggle">
+            <div className="card-content">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Email Alerts</span>
+                  <span className="setting-description">Receive email notifications for important updates</span>
+                </div>
+                <label className="switch">
                   <input
-                    id="emailAlerts"
                     type="checkbox"
                     checked={notifications.emailAlerts}
-                    onChange={() => setNotifications({...notifications, emailAlerts: !notifications.emailAlerts})}
+                    onChange={(e) => setNotifications({ ...notifications, emailAlerts: e.target.checked })}
                   />
-                  <span className="toggle-slider"></span>
+                  <span className="slider"></span>
                 </label>
               </div>
 
-              <div className="setting-toggle">
-                <label htmlFor="predictionNotifications">Prediction Notifications</label>
-                <label className="toggle">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Prediction Notifications</span>
+                  <span className="setting-description">Get notified when new predictions are available</span>
+                </div>
+                <label className="switch">
                   <input
-                    id="predictionNotifications"
                     type="checkbox"
                     checked={notifications.predictionNotifications}
-                    onChange={() => setNotifications({...notifications, predictionNotifications: !notifications.predictionNotifications})}
+                    onChange={(e) => setNotifications({ ...notifications, predictionNotifications: e.target.checked })}
                   />
-                  <span className="toggle-slider"></span>
+                  <span className="slider"></span>
                 </label>
               </div>
 
-              <div className="setting-toggle">
-                <label htmlFor="weeklyReports">Weekly Reports</label>
-                <label className="toggle">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Weekly Reports</span>
+                  <span className="setting-description">Receive weekly summary reports</span>
+                </div>
+                <label className="switch">
                   <input
-                    id="weeklyReports"
                     type="checkbox"
                     checked={notifications.weeklyReports}
-                    onChange={() => setNotifications({...notifications, weeklyReports: !notifications.weeklyReports})}
+                    onChange={(e) => setNotifications({ ...notifications, weeklyReports: e.target.checked })}
                   />
-                  <span className="toggle-slider"></span>
+                  <span className="slider"></span>
                 </label>
               </div>
 
-              <div className="setting-toggle">
-                <label htmlFor="marketNews">Market News</label>
-                <label className="toggle">
+              <div className="setting-group">
+                <div className="setting-label">
+                  <span>Market News</span>
+                  <span className="setting-description">Get updates about market news and trends</span>
+                </div>
+                <label className="switch">
                   <input
-                    id="marketNews"
                     type="checkbox"
                     checked={notifications.marketNews}
-                    onChange={() => setNotifications({...notifications, marketNews: !notifications.marketNews})}
+                    onChange={(e) => setNotifications({ ...notifications, marketNews: e.target.checked })}
                   />
-                  <span className="toggle-slider"></span>
+                  <span className="slider"></span>
                 </label>
+              </div>
+
+              <div className="card-actions">
+                <button className="btn btn-primary" onClick={saveSettings}>
+                  <Save size={16} />
+                  Save Notification Settings
+                </button>
               </div>
             </div>
           </div>
-
-          <div className="card">
-            <div className="card-header">
-              <h2>Appearance</h2>
-            </div>
-            <div className="card-body">
-              <div className="setting-toggle">
-                <label htmlFor="darkMode">Dark Mode</label>
-                <label className="toggle">
-                  <input
-                    id="darkMode"
-                    type="checkbox"
-                    checked={theme === 'dark'}
-                    onChange={toggleTheme}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="danger-zone">
-        <h2>Danger Zone</h2>
-        <div className="danger-actions">
-          <div className="danger-action">
-            <div className="danger-info">
-              <h3>Reset All Predictions</h3>
-              <p>This will delete all your saved prediction data and results.</p>
-            </div>
-            <button className="btn btn-outline danger">
-              <Trash2 size={16} />
-              Reset
-            </button>
-          </div>
-          
-          <div className="danger-action">
-            <div className="danger-info">
-              <h3>Delete Account</h3>
-              <p>Permanently delete your account and all associated data.</p>
-            </div>
-            <button className="btn btn-danger">
-              <Trash2 size={16} />
-              Delete
-            </button>
-          </div>
-        </div>
+        </section>
       </div>
     </div>
   );

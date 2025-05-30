@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown } from 'lucide-react';
 import './Prediction.css';
 
 const PredictionSummary: React.FC = () => {
@@ -38,6 +38,12 @@ const PredictionSummary: React.FC = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 70) return 'high';
+    if (confidence >= 60) return 'medium';
+    return 'low';
+  };
+
   return (
     <div className="prediction-summary">
       <table className="predictions-table">
@@ -69,11 +75,8 @@ const PredictionSummary: React.FC = () => {
                 </div>
               </td>
               <td>
-                <div className="confidence-indicator" title={`${prediction.confidence}% confidence`}>
-                  <div 
-                    className={`confidence-bar ${prediction.confidence > 65 ? 'high' : prediction.confidence > 55 ? 'medium' : 'low'}`}
-                    style={{ width: `${prediction.confidence}%` }}
-                  ></div>
+                <div className="confidence-wrapper">
+                  <span className="confidence-value">{prediction.confidence}%</span>
                 </div>
               </td>
               <td>
@@ -92,16 +95,55 @@ const PredictionSummary: React.FC = () => {
 
       <div className="accuracy-summary">
         <div className="accuracy-metric">
-          <div className="metric-label">Overall Accuracy</div>
-          <div className="metric-value">57.4%</div>
+          <div className="metric-icon">
+            <TrendingUp size={20} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-label">Overall Accuracy</div>
+            <div className="metric-value">57.4%</div>
+            <div className="metric-progress">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: '57.4%' }}
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="accuracy-metric">
-          <div className="metric-label">Up Predictions</div>
-          <div className="metric-value">61.2%</div>
+          <div className="metric-icon">
+            <TrendingUp size={20} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-label">Up Predictions</div>
+            <div className="metric-value">61.2%</div>
+            <div className="metric-progress">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: '61.2%' }}
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="accuracy-metric">
-          <div className="metric-label">Down Predictions</div>
-          <div className="metric-value">52.8%</div>
+          <div className="metric-icon">
+            <TrendingDown size={20} />
+          </div>
+          <div className="metric-content">
+            <div className="metric-label">Down Predictions</div>
+            <div className="metric-value">52.8%</div>
+            <div className="metric-progress">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: '52.8%' }}
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

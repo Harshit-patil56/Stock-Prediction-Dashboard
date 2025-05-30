@@ -1,0 +1,63 @@
+.technical-indicators {
+  background: var(--card-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: var(--shadow-light);
+}
+
+.dark-theme .technical-indicators {
+  background: var(--card-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.indicator-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.indicator-button {
+  padding: 8px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-light);
+}
+
+.dark-theme .indicator-button {
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.indicator-button:hover {
+  background: var(--primary-light);
+  color: white;
+}
+
+.indicator-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.indicator-chart {
+  width: 100%;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .indicator-controls {
+    flex-wrap: wrap;
+  }
+  
+  .indicator-button {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+} 
