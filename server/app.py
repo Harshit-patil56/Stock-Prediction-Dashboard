@@ -28,7 +28,8 @@ except LookupError:
     nltk.download('averaged_perceptron_tagger')
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):
@@ -384,4 +385,5 @@ def remove_from_watchlist(symbol):
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

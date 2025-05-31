@@ -3,6 +3,8 @@ import { Briefcase, Plus, X, Star, RefreshCw, TrendingUp, TrendingDown } from 'l
 import { useNavigate } from 'react-router-dom';
 import './Watchlist.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 interface WatchlistItem {
   symbol: string;
   name: string;
@@ -21,7 +23,7 @@ const Watchlist: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/watchlist');
+      const response = await fetch(`${API_BASE_URL}/watchlist`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -34,7 +36,7 @@ const Watchlist: React.FC = () => {
         const watchlistWithChanges = await Promise.all(
           data.data.map(async (item: WatchlistItem) => {
             try {
-              const priceResponse = await fetch(`/api/historical/${item.symbol}/latest`);
+              const priceResponse = await fetch(`${API_BASE_URL}/historical/${item.symbol}/latest`);
               if (!priceResponse.ok) {
                 return item;
               }
@@ -93,7 +95,7 @@ const Watchlist: React.FC = () => {
   const handleRemoveItem = async (symbol: string) => {
     try {
       setError(null);
-      const response = await fetch(`/api/watchlist/${symbol}`, {
+      const response = await fetch(`${API_BASE_URL}/watchlist/${symbol}`, {
         method: 'DELETE',
       });
       const data = await response.json();

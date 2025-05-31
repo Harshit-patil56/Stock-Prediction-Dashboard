@@ -5,6 +5,8 @@ import HistoricalTable from '../components/tables/HistoricalTable';
 import { useParams } from 'react-router-dom';
 import './HistoricalData.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 const HistoricalData: React.FC = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const initialStock = symbol || '^GSPC';
@@ -42,7 +44,7 @@ const HistoricalData: React.FC = () => {
     setWatchlistError(null);
 
     try {
-      const response = await fetch('/api/watchlist', {
+      const response = await fetch(`${API_BASE_URL}/watchlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
