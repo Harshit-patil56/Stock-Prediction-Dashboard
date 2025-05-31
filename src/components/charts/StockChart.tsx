@@ -52,10 +52,10 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, timeframe }) => {
     if (isLoading || !chartData.length || !chartContainerRef.current) return;
 
     const handleResize = () => {
-      chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
+      _chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
     };
 
-    const chart = createChart(chartContainerRef.current, {
+    const _chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: document.body.classList.contains('dark-theme') ? '#d1d4dc' : '#333',
@@ -68,7 +68,7 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, timeframe }) => {
       height: 400,
     });
 
-    const areaSeries = chart.addAreaSeries({
+    const areaSeries = _chart.addAreaSeries({
       lineColor: '#1E88E5',
       topColor: 'rgba(30, 136, 229, 0.4)',
       bottomColor: 'rgba(30, 136, 229, 0.0)',
@@ -76,13 +76,13 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, timeframe }) => {
 
     areaSeries.setData(chartData);
 
-    chart.timeScale().fitContent();
+    _chart.timeScale().fitContent();
 
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      _chart.remove();
     };
   }, [isLoading, chartData]);
 

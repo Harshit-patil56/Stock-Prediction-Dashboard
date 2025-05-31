@@ -19,13 +19,13 @@ const TechnicalIndicators: React.FC<TechnicalIndicatorsProps> = ({ data, symbol 
     const gains = changes.map(change => change > 0 ? change : 0);
     const losses = changes.map(change => change < 0 ? -change : 0);
 
-    const avgGain = gains.slice(period).map((_, i) => {
-      const sum = gains.slice(i, i + period).reduce((a, b) => a + b, 0);
+    const avgGain = gains.slice(period).map((_, _i) => {
+      const sum = gains.slice(_i, _i + period).reduce((a, b) => a + b, 0);
       return sum / period;
     });
 
-    const avgLoss = losses.slice(period).map((_, i) => {
-      const sum = losses.slice(i, i + period).reduce((a, b) => a + b, 0);
+    const avgLoss = losses.slice(period).map((_, _i) => {
+      const sum = losses.slice(_i, _i + period).reduce((a, b) => a + b, 0);
       return sum / period;
     });
 

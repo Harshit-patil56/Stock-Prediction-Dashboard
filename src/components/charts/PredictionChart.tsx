@@ -103,7 +103,7 @@ const PredictionChart: React.FC<PredictionChartProps> = ({ symbol }) => {
       // Add a marker for the prediction point
       const markerSeries = chart.addLineSeries({
         color: '#4CAF50',
-        lineWidth: 0,
+        lineWidth: 1,
         lastValueVisible: false,
         priceLineVisible: false,
       });
