@@ -3,9 +3,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'r
 
 interface TechnicalIndicatorsProps {
   data: any[];
+  _symbol: string;
 }
 
-const TechnicalIndicators: React.FC<TechnicalIndicatorsProps> = ({ data }) => {
+const TechnicalIndicators: React.FC<TechnicalIndicatorsProps> = ({ data, _symbol }) => {
   const [selectedIndicator, setSelectedIndicator] = useState('RSI');
 
   // Calculate RSI
