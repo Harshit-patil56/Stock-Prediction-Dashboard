@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -11,6 +12,10 @@ from datetime import datetime, timedelta
 import io
 from sentiment_analyzer import SentimentAnalyzer
 import nltk
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Try to download required NLTK data if not present
 try:
@@ -23,6 +28,7 @@ except LookupError:
     nltk.download('averaged_perceptron_tagger')
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):

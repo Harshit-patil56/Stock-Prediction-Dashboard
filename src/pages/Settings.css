@@ -350,13 +350,13 @@ input:checked + .slider:before {
 @media (max-width: 768px) {
   .settings-container {
     padding: 16px;
-  }
+}
 
   .setting-group {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
+}
 
   .setting-input {
     width: 100%;
@@ -368,7 +368,7 @@ input:checked + .slider:before {
 
   .card-actions {
     flex-direction: column;
-  }
+}
 
   .btn {
     width: 100%;
