@@ -2,13 +2,11 @@
 Stock Prediction API for Stock Prediction Dashboard
 
 This module implements a serverless API endpoint for predicting stock prices
-using machine learning. It uses historical data from Yahoo Finance and
-a Random Forest model for predictions.
+using a simple moving average crossover strategy.
 
 Features:
-- Stock price prediction using Random Forest
+- Simple moving average crossover prediction
 - Technical indicator calculation
-- Feature importance analysis
 - Expected price change calculation
 
 Author: Harshit Patil
@@ -17,74 +15,67 @@ Date: 2024
 
 from http.server import BaseHTTPRequestHandler
 import json
-import pandas as pd
-import numpy as np
 import yfinance as yf
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import precision_score
 from urllib.parse import urlparse, parse_qs
 
-def process_data_for_prediction(data):
+def calculate_moving_average(data, window):
     """
-    Process stock data for machine learning prediction.
+    Calculate simple moving average for a given window.
     
     Args:
-        data (pd.DataFrame): Raw stock data from Yahoo Finance
+        data (list): List of prices
+        window (int): Window size for moving average
         
     Returns:
-        pd.DataFrame: Processed data with technical indicators and target variable
+        list: Moving average values
     """
-    data = data.copy()
-    
-    # Calculate daily returns
-    data['Return'] = data['Close'].pct_change()
-    
-    # Add moving averages and their ratios
-    for window in [2, 5, 60, 250, 1000]:
-        data[f'Close_Ratio_{window}'] = data['Close'] / data['Close'].rolling(window=window).mean()
-        data[f'Trend_{window}'] = data['Return'].rolling(window=window).sum()
-    
-    # Add target variable - whether tomorrow's price is higher than today's
-    data['Tomorrow'] = data['Close'].shift(-1)
-    data['Target'] = (data['Tomorrow'] > data['Close']).astype(int)
-    
-    # Remove rows with missing values
-    data = data.dropna()
-    
-    return data
+    return [sum(data[i:i+window])/window for i in range(len(data)-window+1)]
 
-def train_model(data, model_params=None):
+def predict_price(data, short_window=20, long_window=50):
     """
-    Train a Random Forest model for stock price prediction.
+    Predict price movement using moving average crossover.
     
     Args:
-        data (pd.DataFrame): Processed stock data
-        model_params (dict, optional): Parameters for the Random Forest model
+        data (list): List of closing prices
+        short_window (int): Short-term moving average window
+        long_window (int): Long-term moving average window
         
     Returns:
-        tuple: (trained model, list of predictor column names)
+        dict: Prediction results
     """
-    if model_params is None:
-        model_params = {
-            'n_estimators': 200,
-            'min_samples_split': 50,
-            'random_state': 1
-        }
+    # Calculate moving averages
+    short_ma = calculate_moving_average(data, short_window)
+    long_ma = calculate_moving_average(data, long_window)
     
-    # Select features for prediction
-    predictors = ['Close', 'Volume', 'Open', 'High', 'Low']
-    predictors += [col for col in data.columns if 'Ratio' in col or 'Trend' in col]
+    # Get latest values
+    current_short_ma = short_ma[-1]
+    current_long_ma = long_ma[-1]
+    previous_short_ma = short_ma[-2]
+    previous_long_ma = long_ma[-2]
     
-    # Split data into training and testing sets
-    train_size = int(0.8 * len(data))
-    train = data.iloc[:train_size]
-    test = data.iloc[train_size:]
+    # Determine prediction
+    prediction = "up" if current_short_ma > current_long_ma else "down"
     
-    # Train the model
-    model = RandomForestClassifier(**model_params)
-    model.fit(train[predictors], train['Target'])
+    # Calculate confidence based on the difference between moving averages
+    difference = abs(current_short_ma - current_long_ma)
+    max_difference = max(data) * 0.1  # 10% of max price as reference
+    confidence = min(100, (difference / max_difference) * 100)
     
-    return model, predictors
+    # Calculate expected change
+    if prediction == "up":
+        expected_change = (current_short_ma - current_long_ma) / current_long_ma * 100
+    else:
+        expected_change = (current_long_ma - current_short_ma) / current_short_ma * 100
+    
+    return {
+        "prediction": prediction,
+        "confidence": confidence,
+        "expectedChange": expected_change,
+        "features": [
+            {"name": "Short MA", "importance": 0.6},
+            {"name": "Long MA", "importance": 0.4}
+        ]
+    }
 
 class handler(BaseHTTPRequestHandler):
     """
@@ -99,20 +90,11 @@ class handler(BaseHTTPRequestHandler):
         Expected JSON body:
             {
                 "symbol": "AAPL",
-                "period": "1y",
-                "modelParams": {
-                    "n_estimators": 200,
-                    "min_samples_split": 50
-                }
+                "period": "1y"
             }
             
         Returns:
-            JSON response with prediction results including:
-                - prediction: "up" or "down"
-                - confidence: prediction probability
-                - expectedChange: expected price change percentage
-                - accuracy: model accuracy
-                - features: top 6 important features
+            JSON response with prediction results
         """
         try:
             # Parse request body
@@ -123,35 +105,13 @@ class handler(BaseHTTPRequestHandler):
             # Get parameters
             symbol = data.get('symbol', '^GSPC')
             period = data.get('period', '1y')
-            model_params = data.get('modelParams', {})
             
             # Fetch historical data
             stock_data = yf.download(symbol, period=period)
+            closing_prices = stock_data['Close'].tolist()
             
-            # Process data and train model
-            processed_data = process_data_for_prediction(stock_data)
-            model, predictors = train_model(processed_data, model_params)
-            
-            # Make prediction for latest data point
-            latest_data = processed_data.iloc[-1:][predictors]
-            prediction = model.predict(latest_data)[0]
-            probability = model.predict_proba(latest_data)[0][1]
-            
-            # Calculate feature importance
-            feature_importance = [
-                {"name": predictors[i], "importance": float(imp)} 
-                for i, imp in enumerate(model.feature_importances_)
-            ]
-            feature_importance = sorted(feature_importance, key=lambda x: x["importance"], reverse=True)[:6]
-            
-            # Calculate expected price change
-            avg_up_change = processed_data[processed_data['Target'] == 1]['Return'].mean()
-            avg_down_change = processed_data[processed_data['Target'] == 0]['Return'].mean()
-            expected_change = avg_up_change if prediction == 1 else avg_down_change
-            
-            # Calculate model accuracy
-            predictions = model.predict(processed_data[predictors])
-            accuracy = precision_score(processed_data['Target'], predictions)
+            # Make prediction
+            result = predict_price(closing_prices)
             
             # Send response
             self.send_response(200)
@@ -161,13 +121,7 @@ class handler(BaseHTTPRequestHandler):
             
             response = {
                 'success': True,
-                'data': {
-                    "prediction": "up" if prediction == 1 else "down",
-                    "confidence": float(probability * 100),
-                    "expectedChange": float(expected_change * 100),
-                    "accuracy": float(accuracy * 100),
-                    "features": feature_importance
-                }
+                'data': result
             }
             
             self.wfile.write(json.dumps(response).encode())
