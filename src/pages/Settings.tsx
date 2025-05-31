@@ -13,7 +13,6 @@ const Settings: React.FC = () => {
     maxFeatures: 'auto',
     criterion: 'gini'
   });
-  const [apiKey, setApiKey] = useState('');
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
     predictionNotifications: true,
@@ -198,12 +197,10 @@ const Settings: React.FC = () => {
                 <div className="api-key-group">
                   <input
                     type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
                     placeholder="Enter your API key"
                     className="setting-input"
                   />
-                  <button className="btn btn-secondary" onClick={() => setApiKey('')}>
+                  <button className="btn btn-secondary">
                     Clear
                   </button>
                 </div>

@@ -17,15 +17,6 @@ const MarketOverview: React.FC = () => {
     { symbol: 'META', name: 'Meta Platforms', value: 508.19, change: 1.56, trend: 'up' },
   ];
 
-  // Mock sector performance
-  const sectorPerformance = [
-    { name: 'Technology', change: 1.2 },
-    { name: 'Healthcare', change: 0.7 },
-    { name: 'Financials', change: 0.3 },
-    { name: 'Consumer Cyclical', change: -0.5 },
-    { name: 'Industrials', change: 0.9 },
-  ];
-
   return (
     <div className="market-overview">
       <div className="market-summary">
@@ -92,7 +83,7 @@ const MarketOverview: React.FC = () => {
       <div className="sector-performance">
         <h3>Sector Performance</h3>
         <div className="sector-bars">
-          {sectorPerformance.map((sector, index) => (
+          {/* sectorPerformance.map((sector, index) => (
             <div className="sector-item" key={index}>
               <div className="sector-info">
                 <span className="sector-name">{sector.name}</span>
@@ -110,7 +101,7 @@ const MarketOverview: React.FC = () => {
                 ></div>
               </div>
             </div>
-          ))}
+          )) */}
         </div>
       </div>
     </div>

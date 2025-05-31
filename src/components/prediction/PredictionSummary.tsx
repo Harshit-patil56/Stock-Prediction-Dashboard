@@ -38,12 +38,6 @@ const PredictionSummary: React.FC = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 70) return 'high';
-    if (confidence >= 60) return 'medium';
-    return 'low';
-  };
-
   return (
     <div className="prediction-summary">
       <table className="predictions-table">

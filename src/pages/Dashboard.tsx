@@ -14,7 +14,6 @@ const Dashboard: React.FC = () => {
   const [selectedPerformanceStock, setSelectedPerformanceStock] = useState('^GSPC');
   const [highlightSentiment, setHighlightSentiment] = useState(false);
   const sentimentRef = useRef<HTMLDivElement>(null);
-  const predictionSummaryRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const timeframes = [
