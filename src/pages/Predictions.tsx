@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import React, { useState } from 'react';
 import { ArrowRight, Info, Settings } from 'lucide-react';
 import PredictionChart from '../components/charts/PredictionChart';
 import PredictionForm from '../components/prediction/PredictionForm';

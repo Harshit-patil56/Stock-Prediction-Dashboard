@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
+import React, { useState, useEffect } from 'react';
 import { Briefcase, Plus, X, Star, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './Watchlist.css';

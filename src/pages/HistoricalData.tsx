@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import HistoricalChart from '../components/charts/HistoricalChart';
 import HistoricalTable from '../components/tables/HistoricalTable';
