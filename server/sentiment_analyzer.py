@@ -1,19 +1,3 @@
-"""
-Sentiment Analyzer Module for Stock Prediction Dashboard
-
-This module provides a SentimentAnalyzer class that fetches news articles
-using NewsAPI and analyzes their sentiment using TextBlob and NLTK.
-
-Features:
-- News article sentiment analysis
-- Sentiment distribution calculation
-- Article filtering and cleaning
-- Error handling and fallbacks
-
-Author: Harshit Patil
-Date: 2024
-"""
-
 from textblob import TextBlob
 from newsapi import NewsApiClient
 import os
@@ -34,7 +18,7 @@ except Exception as e:
     print(f"Error initializing NewsAPI client: {str(e)}")
     newsapi = None
 
-# Download required NLTK data for text processing
+# Download required NLTK data
 try:
     nltk.download('punkt')
     nltk.download('stopwords')
@@ -42,15 +26,7 @@ except Exception as e:
     print(f"Error downloading NLTK data: {str(e)}")
 
 class SentimentAnalyzer:
-    """
-    A class for analyzing sentiment in news articles related to stock symbols.
-    Uses TextBlob for sentiment analysis and NLTK for text preprocessing.
-    """
     def __init__(self):
-        """
-        Initialize the SentimentAnalyzer with NewsAPI client and stopwords.
-        Downloads required NLTK data if not present.
-        """
         self.newsapi = newsapi
         try:
             self.stop_words = set(stopwords.words('english'))
@@ -68,15 +44,6 @@ class SentimentAnalyzer:
             nltk.download('stopwords')
 
     def clean_text(self, text):
-        """
-        Clean and preprocess text for sentiment analysis.
-        Removes special characters, digits, converts to lowercase, tokenizes,
-        and removes stopwords.
-        Args:
-            text (str): The input text to clean.
-        Returns:
-            str: Cleaned text with only alphabetic characters and no stopwords.
-        """
         # Remove special characters and digits
         text = re.sub(r'[^a-zA-Z\s]', '', text)
         # Convert to lowercase
@@ -90,8 +57,10 @@ class SentimentAnalyzer:
     def analyze_sentiment(self, text):
         """
         Analyzes the sentiment of a given text using TextBlob.
+
         Args:
             text (str): The text to analyze.
+
         Returns:
             float: The polarity score (between -1.0 and 1.0).
         """
@@ -101,9 +70,11 @@ class SentimentAnalyzer:
     def get_news_sentiment(self, symbol, days=7):
         """
         Fetches news articles for a given stock symbol, analyzes sentiment, and returns the results.
+
         Args:
             symbol (str): The stock ticker symbol (e.g., "AAPL").
             days (int): Number of days back from today to fetch news.
+
         Returns:
             dict: A dictionary containing overall sentiment, sentiment distribution, and articles.
         """
@@ -139,6 +110,7 @@ class SentimentAnalyzer:
                 if title and description:
                     full_text = f"{title} {description}"
                     polarity = self.analyze_sentiment(full_text)
+                    sentiments.append(polarity)
                     articles_with_sentiment.append({
                         "title": title,
                         "description": description,
@@ -146,7 +118,6 @@ class SentimentAnalyzer:
                         "publishedAt": article.get('publishedAt', ''),
                         "sentiment": {"polarity": polarity, "subjectivity": TextBlob(full_text).sentiment.subjectivity}
                     })
-                    sentiments.append(polarity)
 
             if sentiments:
                 avg_sentiment = sum(sentiments) / len(sentiments)

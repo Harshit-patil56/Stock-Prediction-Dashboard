@@ -1,3 +1,0 @@
-yfinance==0.2.36
-textblob==0.17.1
-newsapi-python==0.2.7 

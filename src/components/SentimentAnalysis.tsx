@@ -23,8 +23,6 @@ interface SentimentAnalysisProps {
   symbol: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-
 export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
   const [sentimentData, setSentimentData] = useState<SentimentData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +33,7 @@ export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`${API_BASE_URL}/sentiment?symbol=${symbol}`);
+        const response = await fetch(`/api/sentiment?symbol=${symbol}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
