@@ -45,8 +45,8 @@ export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
         } else {
           setError(data.error || 'Failed to fetch sentiment data');
         }
-      } catch (err) {
-        console.error('Error fetching sentiment:', err);
+      } catch (_err) {
+        console.error('Error fetching sentiment:', _err);
         setError('Failed to fetch sentiment data. Please try again later.');
       } finally {
         setLoading(false);

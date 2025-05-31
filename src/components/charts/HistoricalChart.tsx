@@ -88,7 +88,7 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
       height: 400,
     });
 
-    const candleSeries = chart.addCandlestickSeries({
+    const _candleSeries = chart.addCandlestickSeries({
       upColor: '#4CAF50',
       downColor: '#F44336',
       borderVisible: false,
@@ -105,7 +105,7 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
       close: d.Close
     }));
 
-    candleSeries.setData(candleData);
+    _candleSeries.setData(candleData);
 
     chart.timeScale().fitContent();
 

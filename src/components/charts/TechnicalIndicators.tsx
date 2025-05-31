@@ -11,9 +11,9 @@ const TechnicalIndicators: React.FC<TechnicalIndicatorsProps> = ({ data, symbol 
 
   // Calculate RSI
   const calculateRSI = (data: any[], period: number = 14) => {
-    const changes = data.map((item, index) => {
-      if (index === 0) return 0;
-      return item.Close - data[index - 1].Close;
+    const changes = data.map((item, _index) => {
+      if (_index === 0) return 0;
+      return item.Close - data[_index - 1].Close;
     });
 
     const gains = changes.map(change => change > 0 ? change : 0);
