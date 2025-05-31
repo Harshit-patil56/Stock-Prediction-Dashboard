@@ -1,5 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import { useEffect, useState } from 'react';
 
 interface SentimentData {
   overall_sentiment: number;
@@ -28,7 +27,6 @@ export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
   const [sentimentData, setSentimentData] = useState<SentimentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchSentiment = async () => {
@@ -154,7 +152,7 @@ export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
           <h3 className="stat-content">Recent News</h3>
           <div className="recent-news-list">
             {sentimentData.articles.map((article, idx) => (
-              <div key={idx} className={`stat-card ${theme}-theme article-card`}>
+              <div key={idx} className={`stat-card article-card`}>
                 <div className="article-header">
                   <h4 className="stat-content article-title">{article.title}</h4>
                   <span className={`stat-value ${getSentimentColor(article.sentiment.polarity)} article-sentiment-label`}>
