@@ -12,7 +12,7 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [selectedStock, setSelectedStock] = useState(symbol);
+  const [selectedStock] = useState(symbol);
 
   useEffect(() => {
     // Simulate API fetch with a delay
