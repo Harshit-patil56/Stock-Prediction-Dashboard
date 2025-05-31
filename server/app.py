@@ -1,3 +1,21 @@
+"""
+Stock Prediction Dashboard Backend
+
+This Flask application provides the backend API for the Stock Prediction Dashboard.
+It includes endpoints for stock prediction, historical data, sentiment analysis,
+and watchlist management.
+
+Features:
+- Machine learning-based stock price prediction
+- Historical stock data retrieval
+- News sentiment analysis
+- Watchlist management
+- Symbol search functionality
+
+Author: Harshit Patil
+Date: 2024
+"""
+
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import pandas as pd
@@ -14,10 +32,10 @@ from sentiment_analyzer import SentimentAnalyzer
 import nltk
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-# Try to download required NLTK data if not present
+# Download required NLTK data for text processing
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -27,32 +45,53 @@ try:
 except LookupError:
     nltk.download('averaged_perceptron_tagger')
 
+# Initialize Flask application
 app = Flask(__name__)
-# Enable CORS for all routes
+# Enable CORS for all API routes
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Initialize sentiment analyzer
 sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):
+    """
+    Process stock data for machine learning prediction.
+    
+    Args:
+        data (pd.DataFrame): Raw stock data from Yahoo Finance
+        
+    Returns:
+        pd.DataFrame: Processed data with technical indicators and target variable
+    """
     data = data.copy()
     
     # Calculate daily returns
     data['Return'] = data['Close'].pct_change()
     
-    # Add moving averages
+    # Add moving averages and their ratios
     for window in [2, 5, 60, 250, 1000]:
         data[f'Close_Ratio_{window}'] = data['Close'] / data['Close'].rolling(window=window).mean()
         data[f'Trend_{window}'] = data['Return'].rolling(window=window).sum()
     
-    # Add target - whether tomorrow's price is higher than today's
+    # Add target variable - whether tomorrow's price is higher than today's
     data['Tomorrow'] = data['Close'].shift(-1)
     data['Target'] = (data['Tomorrow'] > data['Close']).astype(int)
     
-    # Drop rows with NaN values
+    # Remove rows with missing values
     data = data.dropna()
     
     return data
 
 def train_model(data, model_params=None):
+    """
+    Train a Random Forest model for stock price prediction.
+    
+    Args:
+        data (pd.DataFrame): Processed stock data
+        model_params (dict, optional): Parameters for the Random Forest model
+        
+    Returns:
+        tuple: (trained model, list of predictor column names)
+    """
     if model_params is None:
         model_params = {
             'n_estimators': 200,
@@ -60,14 +99,16 @@ def train_model(data, model_params=None):
             'random_state': 1
         }
     
+    # Select features for prediction
     predictors = ['Close', 'Volume', 'Open', 'High', 'Low']
     predictors += [col for col in data.columns if 'Ratio' in col or 'Trend' in col]
     
-    # Train-test split
+    # Split data into training and testing sets
     train_size = int(0.8 * len(data))
     train = data.iloc[:train_size]
     test = data.iloc[train_size:]
     
+    # Train the model
     model = RandomForestClassifier(**model_params)
     model.fit(train[predictors], train['Target'])
     
@@ -75,22 +116,41 @@ def train_model(data, model_params=None):
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
+    """
+    API endpoint for stock price prediction.
+    
+    Expected JSON body:
+        {
+            "symbol": "AAPL",
+            "period": "1y",
+            "modelParams": {
+                "n_estimators": 200,
+                "min_samples_split": 50
+            }
+        }
+        
+    Returns:
+        JSON response with prediction results including:
+            - prediction: "up" or "down"
+            - confidence: prediction probability
+            - expectedChange: expected price change percentage
+            - accuracy: model accuracy
+            - features: top 6 important features
+    """
     try:
         data = request.json
         symbol = data.get('symbol', '^GSPC')
         period = data.get('period', '1y')
         model_params = data.get('modelParams', {})
         
-        # Fetch data from Yahoo Finance
+        # Fetch historical data
         stock_data = yf.download(symbol, period=period)
         
-        # Process data for prediction
+        # Process data and train model
         processed_data = process_data_for_prediction(stock_data)
-        
-        # Train model and make prediction
         model, predictors = train_model(processed_data, model_params)
         
-        # Get latest data point
+        # Make prediction for latest data point
         latest_data = processed_data.iloc[-1:][predictors]
         prediction = model.predict(latest_data)[0]
         probability = model.predict_proba(latest_data)[0][1]
@@ -102,12 +162,12 @@ def predict():
         ]
         feature_importance = sorted(feature_importance, key=lambda x: x["importance"], reverse=True)[:6]
         
-        # Calculate expected change
+        # Calculate expected price change
         avg_up_change = processed_data[processed_data['Target'] == 1]['Return'].mean()
         avg_down_change = processed_data[processed_data['Target'] == 0]['Return'].mean()
         expected_change = avg_up_change if prediction == 1 else avg_down_change
         
-        # Calculate accuracy
+        # Calculate model accuracy
         predictions = model.predict(processed_data[predictors])
         accuracy = precision_score(processed_data['Target'], predictions)
         
@@ -129,11 +189,21 @@ def predict():
 
 @app.route('/api/historical', methods=['GET'])
 def get_historical_data():
+    """
+    API endpoint for retrieving historical stock data.
+    
+    Query Parameters:
+        symbol (str): Stock symbol (default: '^GSPC')
+        period (str): Time period (default: '1y')
+        
+    Returns:
+        JSON response with historical price data
+    """
     try:
         symbol = request.args.get('symbol', '^GSPC')
         period = request.args.get('period', '1y')
         
-        # Fetch data from Yahoo Finance
+        # Fetch and format historical data
         data = yf.download(symbol, period=period)
         data = data.reset_index()
         
@@ -149,6 +219,15 @@ def get_historical_data():
 
 @app.route('/api/symbols', methods=['GET'])
 def search_symbols():
+    """
+    API endpoint for searching stock symbols and indices.
+    
+    Query Parameters:
+        query (str): Search term
+        
+    Returns:
+        JSON response with matching symbols, sorted by relevance
+    """
     try:
         query = request.args.get('query', '').strip().lower()
         
@@ -158,7 +237,7 @@ def search_symbols():
                 'data': []
             })
 
-        # Common stock indices
+        # Predefined list of major indices
         indices = [
             {'symbol': '^GSPC', 'name': 'S&P 500', 'type': 'Index'},
             {'symbol': '^DJI', 'name': 'Dow Jones Industrial Average', 'type': 'Index'},
@@ -167,7 +246,7 @@ def search_symbols():
             {'symbol': '^VIX', 'name': 'CBOE Volatility Index', 'type': 'Index'},
         ]
 
-        # Popular stocks
+        # Predefined list of popular stocks
         stocks = [
             {'symbol': 'AAPL', 'name': 'Apple Inc.', 'type': 'Technology'},
             {'symbol': 'MSFT', 'name': 'Microsoft Corporation', 'type': 'Technology'},
@@ -189,7 +268,7 @@ def search_symbols():
         # Combine all symbols
         all_symbols = indices + stocks
 
-        # Search in both symbol and name
+        # Search in symbol and name
         results = []
         for item in all_symbols:
             if (query in item['symbol'].lower() or 
@@ -197,35 +276,23 @@ def search_symbols():
                 any(word in item['name'].lower() for word in query.split())):
                 results.append(item)
 
-        # Sort results: exact matches first, then partial matches
-        def sort_key(item):
-            symbol_match = item['symbol'].lower() == query
-            name_match = item['name'].lower() == query
-            symbol_starts = item['symbol'].lower().startswith(query)
-            name_starts = item['name'].lower().startswith(query)
-            
-            if symbol_match or name_match:
-                return 0
-            elif symbol_starts or name_starts:
-                return 1
-            else:
-                return 2
-
-        results.sort(key=sort_key)
-
-        # Limit results to prevent overwhelming the UI
-        results = results[:10]
+        # Sort results by relevance
+        results.sort(key=lambda x: (
+            query == x['symbol'].lower(),  # Exact symbol match
+            query in x['symbol'].lower(),  # Partial symbol match
+            query == x['name'].lower(),    # Exact name match
+            query in x['name'].lower()     # Partial name match
+        ), reverse=True)
 
         return jsonify({
             'success': True,
-            'data': results
+            'data': results[:10]  # Return top 10 matches
         })
-
     except Exception as e:
         return jsonify({
             'success': False,
             'error': str(e)
-        }), 500
+        })
 
 @app.route('/api/sentiment', methods=['GET'])
 def sentiment():
