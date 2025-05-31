@@ -1,3 +1,27 @@
+"""
+Stock Prediction AI Backend Server
+
+This Flask application serves as the backend for a stock prediction dashboard.
+It provides endpoints for stock data retrieval, price predictions, and sentiment analysis.
+The server uses machine learning models to predict stock movements and analyzes news sentiment.
+
+Key Features:
+- Stock price prediction using Random Forest Classifier
+- Historical data retrieval from Yahoo Finance
+- News sentiment analysis
+- Watchlist management
+- Symbol search functionality
+
+Dependencies:
+- Flask: Web framework
+- Flask-CORS: Cross-origin resource sharing
+- Pandas: Data manipulation
+- NumPy: Numerical computations
+- yfinance: Yahoo Finance API
+- scikit-learn: Machine learning
+- NLTK: Natural Language Processing
+"""
+
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import pandas as pd
@@ -14,10 +38,10 @@ from sentiment_analyzer import SentimentAnalyzer
 import nltk
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-# Try to download required NLTK data if not present
+# Download required NLTK data for text processing
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -27,7 +51,10 @@ try:
 except LookupError:
     nltk.download('averaged_perceptron_tagger')
 
+# Initialize Flask application
 app = Flask(__name__)
+
+# Configure CORS to allow requests from specific origins
 CORS(app, resources={
     r"/api/*": {
         "origins": [
@@ -41,29 +68,50 @@ CORS(app, resources={
         "max_age": 3600
     }
 })
+
+# Initialize sentiment analyzer
 sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):
+    """
+    Process stock data for machine learning prediction.
+    
+    Args:
+        data (pd.DataFrame): Raw stock data from Yahoo Finance
+        
+    Returns:
+        pd.DataFrame: Processed data with technical indicators and target variable
+    """
     data = data.copy()
     
     # Calculate daily returns
     data['Return'] = data['Close'].pct_change()
     
-    # Add moving averages
+    # Add moving averages and trend indicators
     for window in [2, 5, 60, 250, 1000]:
         data[f'Close_Ratio_{window}'] = data['Close'] / data['Close'].rolling(window=window).mean()
         data[f'Trend_{window}'] = data['Return'].rolling(window=window).sum()
     
-    # Add target - whether tomorrow's price is higher than today's
+    # Create target variable (1 if price goes up tomorrow, 0 if down)
     data['Tomorrow'] = data['Close'].shift(-1)
     data['Target'] = (data['Tomorrow'] > data['Close']).astype(int)
     
-    # Drop rows with NaN values
+    # Remove rows with missing values
     data = data.dropna()
     
     return data
 
 def train_model(data, model_params=None):
+    """
+    Train a Random Forest model for stock price prediction.
+    
+    Args:
+        data (pd.DataFrame): Processed stock data
+        model_params (dict, optional): Model hyperparameters
+        
+    Returns:
+        tuple: (trained model, list of predictor names)
+    """
     if model_params is None:
         model_params = {
             'n_estimators': 200,
@@ -71,14 +119,16 @@ def train_model(data, model_params=None):
             'random_state': 1
         }
     
+    # Define predictor variables
     predictors = ['Close', 'Volume', 'Open', 'High', 'Low']
     predictors += [col for col in data.columns if 'Ratio' in col or 'Trend' in col]
     
-    # Train-test split
+    # Split data into training and testing sets
     train_size = int(0.8 * len(data))
     train = data.iloc[:train_size]
     test = data.iloc[train_size:]
     
+    # Train the model
     model = RandomForestClassifier(**model_params)
     model.fit(train[predictors], train['Target'])
     
@@ -86,22 +136,33 @@ def train_model(data, model_params=None):
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
+    """
+    Endpoint for stock price prediction.
+    
+    Expected JSON payload:
+    {
+        "symbol": "AAPL",
+        "period": "1y",
+        "modelParams": {}
+    }
+    
+    Returns:
+        JSON response with prediction results
+    """
     try:
         data = request.json
         symbol = data.get('symbol', '^GSPC')
         period = data.get('period', '1y')
         model_params = data.get('modelParams', {})
         
-        # Fetch data from Yahoo Finance
+        # Fetch historical data
         stock_data = yf.download(symbol, period=period)
         
-        # Process data for prediction
+        # Process data and train model
         processed_data = process_data_for_prediction(stock_data)
-        
-        # Train model and make prediction
         model, predictors = train_model(processed_data, model_params)
         
-        # Get latest data point
+        # Make prediction for latest data point
         latest_data = processed_data.iloc[-1:][predictors]
         prediction = model.predict(latest_data)[0]
         probability = model.predict_proba(latest_data)[0][1]
@@ -113,12 +174,12 @@ def predict():
         ]
         feature_importance = sorted(feature_importance, key=lambda x: x["importance"], reverse=True)[:6]
         
-        # Calculate expected change
+        # Calculate expected price change
         avg_up_change = processed_data[processed_data['Target'] == 1]['Return'].mean()
         avg_down_change = processed_data[processed_data['Target'] == 0]['Return'].mean()
         expected_change = avg_up_change if prediction == 1 else avg_down_change
         
-        # Calculate accuracy
+        # Calculate model accuracy
         predictions = model.predict(processed_data[predictors])
         accuracy = precision_score(processed_data['Target'], predictions)
         
@@ -140,11 +201,21 @@ def predict():
 
 @app.route('/api/historical', methods=['GET'])
 def get_historical_data():
+    """
+    Endpoint for retrieving historical stock data.
+    
+    Query Parameters:
+        symbol (str): Stock symbol (default: ^GSPC)
+        period (str): Time period (default: 1y)
+        
+    Returns:
+        JSON response with historical price data
+    """
     try:
         symbol = request.args.get('symbol', '^GSPC')
         period = request.args.get('period', '1y')
         
-        # Fetch data from Yahoo Finance
+        # Fetch and format data
         data = yf.download(symbol, period=period)
         data = data.reset_index()
         
@@ -160,6 +231,15 @@ def get_historical_data():
 
 @app.route('/api/symbols', methods=['GET'])
 def search_symbols():
+    """
+    Endpoint for searching stock symbols and indices.
+    
+    Query Parameters:
+        query (str): Search term
+        
+    Returns:
+        JSON response with matching symbols and their details
+    """
     try:
         query = request.args.get('query', '').strip().lower()
         
@@ -169,7 +249,7 @@ def search_symbols():
                 'data': []
             })
 
-        # Common stock indices
+        # Define common stock indices
         indices = [
             {'symbol': '^GSPC', 'name': 'S&P 500', 'type': 'Index'},
             {'symbol': '^DJI', 'name': 'Dow Jones Industrial Average', 'type': 'Index'},
@@ -178,7 +258,7 @@ def search_symbols():
             {'symbol': '^VIX', 'name': 'CBOE Volatility Index', 'type': 'Index'},
         ]
 
-        # Popular stocks
+        # Define popular stocks
         stocks = [
             {'symbol': 'AAPL', 'name': 'Apple Inc.', 'type': 'Technology'},
             {'symbol': 'MSFT', 'name': 'Microsoft Corporation', 'type': 'Technology'},
@@ -200,7 +280,7 @@ def search_symbols():
         # Combine all symbols
         all_symbols = indices + stocks
 
-        # Search in both symbol and name
+        # Search in symbol and name
         results = []
         for item in all_symbols:
             if (query in item['symbol'].lower() or 
@@ -208,7 +288,7 @@ def search_symbols():
                 any(word in item['name'].lower() for word in query.split())):
                 results.append(item)
 
-        # Sort results: exact matches first, then partial matches
+        # Sort results by relevance
         def sort_key(item):
             symbol_match = item['symbol'].lower() == query
             name_match = item['name'].lower() == query
@@ -223,9 +303,7 @@ def search_symbols():
                 return 2
 
         results.sort(key=sort_key)
-
-        # Limit results to prevent overwhelming the UI
-        results = results[:10]
+        results = results[:10]  # Limit results
 
         return jsonify({
             'success': True,
@@ -240,6 +318,16 @@ def search_symbols():
 
 @app.route('/api/sentiment', methods=['GET'])
 def sentiment():
+    """
+    Endpoint for retrieving news sentiment analysis.
+    
+    Query Parameters:
+        symbol (str): Stock symbol (default: AAPL)
+        days (int): Number of days to analyze (default: 7)
+        
+    Returns:
+        JSON response with sentiment analysis results
+    """
     symbol = request.args.get('symbol', 'AAPL')
     days = int(request.args.get('days', 7))
     try:
@@ -248,56 +336,39 @@ def sentiment():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-# Watchlist management
 @app.route('/api/watchlist', methods=['GET'])
 def get_watchlist():
+    """
+    Endpoint for retrieving user's watchlist.
+    
+    Returns:
+        JSON response with watchlist data
+    """
     try:
-        # Use absolute path for watchlist file
-        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
-        print(f"Watchlist file path: {watchlist_file}")  # Debug log
-        
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
-        
-        if os.path.exists(watchlist_file):
-            try:
-                with open(watchlist_file, 'r') as f:
-                    watchlist = json.load(f)
-                print(f"Loaded watchlist: {watchlist}")  # Debug log
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error: {str(e)}")  # Debug log
-                watchlist = []
-                with open(watchlist_file, 'w') as f:
-                    json.dump(watchlist, f)
-        else:
-            print("Watchlist file does not exist, creating new file")  # Debug log
-            watchlist = []
-            with open(watchlist_file, 'w') as f:
-                json.dump(watchlist, f)
-        
-        return jsonify({
-            'success': True,
-            'data': watchlist
-        })
+        with open('server/watchlist.json', 'r') as f:
+            watchlist = json.load(f)
+        return jsonify({"success": True, "data": watchlist})
+    except FileNotFoundError:
+        return jsonify({"success": True, "data": []})
     except Exception as e:
-        print(f"Error in get_watchlist: {str(e)}")  # Debug log
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/api/watchlist', methods=['POST'])
 def add_to_watchlist():
+    """
+    Endpoint for adding a stock to the watchlist.
+    
+    Expected JSON payload:
+    {
+        "symbol": "AAPL",
+        "name": "Apple Inc."
+    }
+    
+    Returns:
+        JSON response with updated watchlist
+    """
     try:
-        data = request.get_json()
-        print(f"Received data: {data}")  # Debug log
-        
-        if not data:
-            return jsonify({
-                'success': False,
-                'error': 'No data provided'
-            }), 400
-            
+        data = request.json
         symbol = data.get('symbol')
         name = data.get('name')
         
@@ -306,54 +377,36 @@ def add_to_watchlist():
                 'success': False,
                 'error': 'Symbol and name are required'
             }), 400
-        
-        # Use absolute path for watchlist file
-        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
-        print(f"Watchlist file path: {watchlist_file}")  # Debug log
-        
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
-        
-        if os.path.exists(watchlist_file):
-            try:
-                with open(watchlist_file, 'r') as f:
-                    watchlist = json.load(f)
-                print(f"Loaded watchlist: {watchlist}")  # Debug log
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error: {str(e)}")  # Debug log
-                watchlist = []
-        else:
-            print("Watchlist file does not exist, creating new file")  # Debug log
+            
+        try:
+            with open('server/watchlist.json', 'r') as f:
+                watchlist = json.load(f)
+        except FileNotFoundError:
             watchlist = []
-        
+            
         # Check if symbol already exists
         if any(item['symbol'] == symbol for item in watchlist):
-            existing_item = next(item for item in watchlist if item['symbol'] == symbol)
             return jsonify({
                 'success': False,
-                'error': f"{existing_item['name']} is already in your watchlist"
+                'error': 'Symbol already in watchlist'
             }), 400
-        
-        # Add new item
-        new_item = {
+            
+        # Add new symbol
+        watchlist.append({
             'symbol': symbol,
             'name': name,
             'added_at': datetime.now().isoformat()
-        }
-        watchlist.append(new_item)
-        print(f"Adding new item: {new_item}")  # Debug log
+        })
         
         # Save updated watchlist
-        with open(watchlist_file, 'w') as f:
-            json.dump(watchlist, f)
-        print("Watchlist saved successfully")  # Debug log
-        
+        with open('server/watchlist.json', 'w') as f:
+            json.dump(watchlist, f, indent=2)
+            
         return jsonify({
             'success': True,
             'data': watchlist
         })
     except Exception as e:
-        print(f"Error in add_to_watchlist: {str(e)}")  # Debug log
         return jsonify({
             'success': False,
             'error': str(e)
@@ -361,39 +414,41 @@ def add_to_watchlist():
 
 @app.route('/api/watchlist/<symbol>', methods=['DELETE'])
 def remove_from_watchlist(symbol):
+    """
+    Endpoint for removing a stock from the watchlist.
+    
+    Args:
+        symbol (str): Stock symbol to remove
+        
+    Returns:
+        JSON response with updated watchlist
+    """
     try:
-        # Use absolute path for watchlist file
-        watchlist_file = os.path.join(os.path.dirname(__file__), 'watchlist.json')
-        
-        # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(watchlist_file), exist_ok=True)
-        
-        if os.path.exists(watchlist_file):
-            try:
-                with open(watchlist_file, 'r') as f:
-                    watchlist = json.load(f)
-            except json.JSONDecodeError:
-                watchlist = []
-        else:
-            watchlist = []
+        try:
+            with open('server/watchlist.json', 'r') as f:
+                watchlist = json.load(f)
+        except FileNotFoundError:
+            return jsonify({
+                'success': False,
+                'error': 'Watchlist is empty'
+            }), 404
             
-        # Remove item
+        # Remove symbol if exists
         watchlist = [item for item in watchlist if item['symbol'] != symbol]
         
         # Save updated watchlist
-        with open(watchlist_file, 'w') as f:
-            json.dump(watchlist, f)
-        
+        with open('server/watchlist.json', 'w') as f:
+            json.dump(watchlist, f, indent=2)
+            
         return jsonify({
             'success': True,
             'data': watchlist
         })
     except Exception as e:
-        print(f"Error in remove_from_watchlist: {str(e)}")  # Add logging
         return jsonify({
             'success': False,
             'error': str(e)
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)

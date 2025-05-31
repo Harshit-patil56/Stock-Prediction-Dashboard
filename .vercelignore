@@ -1,0 +1,64 @@
+# Development files
+.git
+.gitignore
+.env
+.env.*
+*.log
+node_modules
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Test files
+tests/
+test/
+__tests__/
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+
+# Documentation
+docs/
+*.md
+LICENSE
+CHANGELOG.md
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Build files
+dist/
+build/
+*.tsbuildinfo
+
+# Large data files
+*.csv
+*.json
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache
+.cache/
+.npm/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Misc
+*.bak
+*.tmp
+*.temp 
