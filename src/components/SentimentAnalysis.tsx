@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 interface SentimentData {

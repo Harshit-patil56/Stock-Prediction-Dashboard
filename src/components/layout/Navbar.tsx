@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../context/ThemeContext';
 import { MenuIcon, Moon, Sun, Search, Loader2, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -29,7 +28,6 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar, isOpen }) => {
     return saved ? JSON.parse(saved) : [];
   });
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const location = useLocation();
 
   // Save search history to localStorage

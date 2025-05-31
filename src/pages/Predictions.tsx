@@ -7,7 +7,6 @@ import PredictionResults from '../components/prediction/PredictionResults';
 import './Predictions.css';
 
 const Predictions: React.FC = () => {
-  const { theme } = useContext(ThemeContext);
   const [stockSymbol, setStockSymbol] = useState('^GSPC');
   const [isRunning, setIsRunning] = useState(false);
   const [isResultsVisible, setIsResultsVisible] = useState(false);

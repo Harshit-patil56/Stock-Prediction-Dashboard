@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom';
 import './HistoricalData.css';
 
 const HistoricalData: React.FC = () => {
-  const { theme } = useContext(ThemeContext);
   const { symbol } = useParams<{ symbol: string }>();
   const initialStock = symbol || '^GSPC';
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');

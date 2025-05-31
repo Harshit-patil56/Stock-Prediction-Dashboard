@@ -127,7 +127,7 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
       ) : (
         <>
           <div className="chart-container" ref={chartContainerRef}></div>
-          <TechnicalIndicators symbol={symbol} data={chartData} />
+          <TechnicalIndicators _symbol={symbol} data={chartData} />
         </>
       )}
     </div>

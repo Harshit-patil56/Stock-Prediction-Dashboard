@@ -12,7 +12,6 @@ interface WatchlistItem {
 }
 
 const Watchlist: React.FC = () => {
-  const { theme } = useContext(ThemeContext);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
