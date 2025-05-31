@@ -22,7 +22,7 @@ const PredictionChart: React.FC<PredictionChartProps> = ({ symbol }) => {
       startDate.setDate(startDate.getDate() - 180); // 6 months of data
       
       const data = [];
-      let currentDate = new Date(startDate);
+      const currentDate = new Date(startDate);
       let price = symbol === '^GSPC' ? 4500 : 150;
       
       while (currentDate <= new Date()) {

@@ -69,7 +69,7 @@ const TechnicalIndicators: React.FC<TechnicalIndicatorsProps> = ({ data, symbol 
   // Helper function to calculate EMA
   const calculateEMA = (data: any[], period: number) => {
     const k = 2 / (period + 1);
-    let ema = [data[0].Close];
+    const ema = [data[0].Close];
     
     for (let i = 1; i < data.length; i++) {
       ema.push(data[i].Close * k + ema[i - 1] * (1 - k));

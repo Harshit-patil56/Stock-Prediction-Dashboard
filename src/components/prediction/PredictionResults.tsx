@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Info, ArrowRight, BarChart, AlertTriangle, Clock, Shield } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info, ArrowRight, BarChart, AlertTriangle, Shield } from 'lucide-react';
 import './Prediction.css';
 
 interface FeatureImportance {

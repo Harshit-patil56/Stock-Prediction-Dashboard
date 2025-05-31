@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { Download, Filter, RefreshCw, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import HistoricalChart from '../components/charts/HistoricalChart';
 import HistoricalTable from '../components/tables/HistoricalTable';
 import { useParams } from 'react-router-dom';

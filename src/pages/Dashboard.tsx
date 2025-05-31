@@ -1,6 +1,6 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { TrendingUp, TrendingDown, DollarSign, Zap, AlertTriangle, Info, RefreshCw, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Zap, AlertTriangle, Info, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import StockChart from '../components/charts/StockChart';
 import PredictionSummary from '../components/prediction/PredictionSummary';
 import MarketOverview from '../components/market/MarketOverview';

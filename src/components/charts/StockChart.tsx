@@ -26,7 +26,7 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, timeframe }) => {
                                               timeframe === '6m' ? 180 : 365));
       
       const data = [];
-      let currentDate = new Date(startDate);
+      const currentDate = new Date(startDate);
       let price = ticker === '^GSPC' ? 4500 : 150;
       
       while (currentDate <= new Date()) {

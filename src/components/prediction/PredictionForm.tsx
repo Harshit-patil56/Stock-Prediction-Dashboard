@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, AlertTriangle, Upload } from 'lucide-react';
+import { Play, AlertTriangle } from 'lucide-react';
 import './Prediction.css';
 
 interface PredictionFormProps {

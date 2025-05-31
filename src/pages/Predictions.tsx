@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { ArrowRight, Play, Info, Settings } from 'lucide-react';
+import { ArrowRight, Info, Settings } from 'lucide-react';
 import PredictionChart from '../components/charts/PredictionChart';
 import PredictionForm from '../components/prediction/PredictionForm';
 import PredictionResults from '../components/prediction/PredictionResults';

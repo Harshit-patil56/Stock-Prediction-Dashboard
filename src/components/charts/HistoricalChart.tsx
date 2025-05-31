@@ -31,7 +31,7 @@ const HistoricalChart: React.FC<HistoricalChartProps> = ({ symbol, period }) => 
       startDate.setDate(startDate.getDate() - days);
       
       const data = [];
-      let currentDate = new Date(startDate);
+      const currentDate = new Date(startDate);
       let price = symbol === '^GSPC' ? 4500 : 
                  symbol === '^DJI' ? 35000 : 
                  symbol === '^IXIC' ? 14000 : 150;

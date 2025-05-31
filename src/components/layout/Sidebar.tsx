@@ -6,8 +6,7 @@ import {
   LineChart, 
   BarChart2, 
   Settings, 
-  X,
-  Users
+  X
 } from 'lucide-react';
 import Watchlist from '../watchlist/Watchlist';
 import './Sidebar.css';
