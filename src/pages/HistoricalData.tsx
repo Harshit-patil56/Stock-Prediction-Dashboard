@@ -44,6 +44,7 @@ const HistoricalData: React.FC = () => {
     try {
       const response = await fetch('/api/watchlist', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },

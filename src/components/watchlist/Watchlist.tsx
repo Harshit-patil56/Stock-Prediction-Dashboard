@@ -21,7 +21,12 @@ const Watchlist: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/watchlist');
+      const response = await fetch('/api/watchlist', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -34,15 +39,23 @@ const Watchlist: React.FC = () => {
         const watchlistWithChanges = await Promise.all(
           data.data.map(async (item: WatchlistItem) => {
             try {
-              const priceResponse = await fetch(`/api/historical/${item.symbol}/latest`);
+              const priceResponse = await fetch(`/api/historical?symbol=${item.symbol}&period=1d`, {
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              });
               if (!priceResponse.ok) {
                 return item;
               }
               const priceData = await priceResponse.json();
-              if (priceData.success && priceData.data && priceData.data.change) {
+              if (priceData.success && priceData.data && priceData.data.length > 0) {
+                const latest = priceData.data[priceData.data.length - 1];
+                const previous = priceData.data[0];
+                const change = ((latest.Close - previous.Close) / previous.Close) * 100;
                 return {
                   ...item,
-                  change: priceData.data.change
+                  change: change
                 };
               }
               return item;
@@ -95,6 +108,10 @@ const Watchlist: React.FC = () => {
       setError(null);
       const response = await fetch(`/api/watchlist/${symbol}`, {
         method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       const data = await response.json();
       if (data.success) {

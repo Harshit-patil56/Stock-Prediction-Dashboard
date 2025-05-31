@@ -33,7 +33,12 @@ export function SentimentAnalysis({ symbol }: SentimentAnalysisProps) {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`/api/sentiment?symbol=${symbol}`);
+        const response = await fetch(`/api/sentiment?symbol=${symbol}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

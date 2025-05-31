@@ -28,7 +28,19 @@ except LookupError:
     nltk.download('averaged_perceptron_tagger')
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "https://stock-prediction-dashboard-zrrk.vercel.app",
+            "http://localhost:5173",  # For local development
+            "http://localhost:3000"   # Alternative local development port
+        ],
+        "methods": ["GET", "POST", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "max_age": 3600
+    }
+})
 sentiment_analyzer = SentimentAnalyzer()
 
 def process_data_for_prediction(data):
