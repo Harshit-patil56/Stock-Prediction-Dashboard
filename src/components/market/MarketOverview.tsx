@@ -79,31 +79,6 @@ const MarketOverview: React.FC = () => {
           </tbody>
         </table>
       </div>
-
-      <div className="sector-performance">
-        <h3>Sector Performance</h3>
-        <div className="sector-bars">
-          {/* sectorPerformance.map((sector, index) => (
-            <div className="sector-item" key={index}>
-              <div className="sector-info">
-                <span className="sector-name">{sector.name}</span>
-                <span className={`sector-change ${sector.change > 0 ? 'up' : 'down'}`}>
-                  {sector.change > 0 ? '+' : ''}{sector.change.toFixed(1)}%
-                </span>
-              </div>
-              <div className="sector-bar-container">
-                <div 
-                  className={`sector-bar ${sector.change > 0 ? 'up' : 'down'}`}
-                  style={{ 
-                    width: `${Math.abs(sector.change) * 20}%`,
-                    marginLeft: sector.change < 0 ? 'auto' : '0'
-                  }}
-                ></div>
-              </div>
-            </div>
-          )) */}
-        </div>
-      </div>
     </div>
   );
 };
